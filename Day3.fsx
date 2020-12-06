@@ -1,5 +1,6 @@
 let input = System.IO.File.ReadAllLines "inputs/day3.txt"
 
+#time
 let splittedInput = 
     input |> Array.map Seq.toArray
 
@@ -23,3 +24,4 @@ getAllLocationsWithMove 3 1
 |> Array.map (fun (dx, dy) -> getAllLocationsWithMove dx dy |> countChar '#' |> int64)
 |> Array.reduce (*)
 |> printfn "Part 2: %A"
+#time

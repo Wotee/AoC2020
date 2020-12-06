@@ -1,6 +1,7 @@
 open System.Text.RegularExpressions
 let input = System.IO.File.ReadAllText "inputs/day4.txt" |> fun s -> s.Split $"{System.Environment.NewLine}{System.Environment.NewLine}"
 
+#time
 let correctFields = 
     input
     |> Array.filter (fun s ->
@@ -59,3 +60,4 @@ correctFields
     tryValidate pidPattern None s )
 |> Array.length
 |> printfn "Part 2: %A" 
+#time

@@ -1,6 +1,6 @@
-#time
 let input = System.IO.File.ReadAllLines "inputs/day1.txt" |> Array.map int
 
+#time
 let makePairs inp = List.allPairs inp inp
 
 let len = Array.length input - 1

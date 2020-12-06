@@ -16,8 +16,8 @@ let seatIds =
     input
     |> Array.map (
         splitDirections
-        >> (fun (rowInput, seatInput) -> parse 127 rowInput, parse 7 seatInput)
-        >> (fun (row, seat) -> row * 8 + seat))
+        >> fun (rowInput, seatInput) -> parse 127 rowInput, parse 7 seatInput
+        >> fun (row, seat) -> row * 8 + seat)
     |> Array.sort
 
 let max = Array.last seatIds
@@ -29,3 +29,4 @@ max
 |> Array.except seatIds
 |> Array.exactlyOne
 |> printfn "Part 2: %A"
+#time

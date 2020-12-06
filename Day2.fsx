@@ -1,5 +1,5 @@
-#time
 let input = System.IO.File.ReadAllLines "inputs/day2.txt"
+#time
 
 type PasswordRule = 
     {
