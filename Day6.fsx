@@ -1,13 +1,15 @@
-let input = System.IO.File.ReadAllText "inputs/day6.txt" |> fun s -> s.Split $"{System.Environment.NewLine}{System.Environment.NewLine}"
+open System
+let nl = Environment.NewLine
+let input = IO.File.ReadAllText "inputs/day6.txt" |> fun s -> s.Split $"{nl}{nl}"
 
 #time
 let countAnyMatches : string -> int =
-    fun s -> s.Replace(System.Environment.NewLine, "")
+    Seq.filter Char.IsLetter
     >> Set.ofSeq
     >> Set.count
 
 let countAllMatches : string -> int =
-    fun s -> s.Split(System.Environment.NewLine) 
+    fun s -> s.Split nl 
     >> Array.map Set.ofSeq
     >> Set.intersectMany
     >> Set.count
