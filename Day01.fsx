@@ -1,4 +1,4 @@
-let input = System.IO.File.ReadAllLines "inputs/day1.txt" |> Array.map int
+let input = System.IO.File.ReadAllLines "inputs/day01.txt" |> Array.map int
 
 #time
 let makePairs inp = List.allPairs inp inp

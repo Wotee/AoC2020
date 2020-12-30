@@ -1,6 +1,6 @@
 open System
 let nl = Environment.NewLine
-let input = IO.File.ReadAllText "inputs/day6.txt" |> fun s -> s.Split $"{nl}{nl}"
+let input = IO.File.ReadAllText "inputs/day06.txt" |> fun s -> s.Split $"{nl}{nl}"
 
 #time
 let countAnyMatches : string -> int =

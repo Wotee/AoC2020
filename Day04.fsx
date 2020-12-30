@@ -1,5 +1,5 @@
 open System.Text.RegularExpressions
-let input = System.IO.File.ReadAllText "inputs/day4.txt" |> fun s -> s.Split $"{System.Environment.NewLine}{System.Environment.NewLine}"
+let input = System.IO.File.ReadAllText "inputs/day04.txt" |> fun s -> s.Split $"{System.Environment.NewLine}{System.Environment.NewLine}"
 
 #time
 let correctFields = 

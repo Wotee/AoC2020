@@ -1,4 +1,4 @@
-let input = System.IO.File.ReadAllLines "inputs/day3.txt"
+let input = System.IO.File.ReadAllLines "inputs/day03.txt"
 
 #time
 let splittedInput = 
