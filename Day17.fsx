@@ -6,56 +6,62 @@ type Cell =
     with static member ofChar = function '.' -> Inactive | '#' -> Active | _ -> failwith "Invalid data"
 
 let rounds = 6
-let possibleGrowth = 2 * rounds
-let x = Array.length input + possibleGrowth
-let y = Seq.length (Array.head input) + possibleGrowth
-let z = 1 + possibleGrowth
-let w = 1 + possibleGrowth
 let initialData = input |> Array.map (Seq.toArray >> Array.map Cell.ofChar)
-let middleZ = z / 2
-let middleW = w / 2
+let x = Array.length initialData
+let y = Array.length (Array.head initialData)
 
-let initializer3D x' y' z' =
-    if z' = middleZ && rounds <= x' && x' < (x - rounds) && rounds <= y' && y' < (y - rounds)
-    then initialData.[x'-rounds].[y'-rounds]
+let valid value maxVal = 0 <= value && value < maxVal
+
+let getItemOrDefault3d x y z (array : Cell [,,]) =
+    if (valid x (Array3D.length1 array)) && (valid y (Array3D.length2 array)) && (valid z (Array3D.length3 array))
+    then array.[x,y,z]
     else Inactive
 
-let initializer4D x' y' z' w' =
-    if z' = middleZ && w' = middleW && rounds <= x' && x' < (x - rounds) && rounds <= y' && y' < (y - rounds)
-    then initialData.[x'-rounds].[y'-rounds]
+let getItemOrDefault4d x y z w (array : Cell [,,,]) =
+    if (valid x (Array4D.length1 array)) && (valid y (Array4D.length2 array)) && (valid z (Array4D.length3 array)) && (valid w (Array4D.length4 array))
+    then array.[x,y,z,w]
     else Inactive
 
-let values v = [|v-1..v+1|]
+let countAdjacent3d x y z array =
+    [0..26] // (3^3) - 1, because 3D space
+    |> List.filter ((<>) 13) // (0,0,0)
+    |> List.sumBy (fun i ->
+        match x + i % 3 - 1, y + (i / 3) % 3 - 1, z + i / 9 - 1 with
+        | x', y', z' when
+            (valid x' (Array3D.length1 array)) &&
+            (valid y' (Array3D.length2 array)) &&
+            (valid z' (Array3D.length3 array)) ->
+            match array.[x', y', z'] with
+            | Active -> 1
+            | Inactive -> 0
+        | _,_,_ -> 0
+    )
 
-let getAdjacentCoordinates3d x y z =
-    Array.allPairs (Array.allPairs (values x) (values y)) (values z)
-    |> Array.choose (fun ((x', y'), z') -> if x = x' && y = y' && z = z' then None else Some (x', y', z'))
+let countAdjacent4d x y z w array =
+    [0..80] // (3^4) - 1, because 4D space
+    |> List.filter ((<>) 40) // (0,0,0,0)
+    |> List.sumBy (fun i ->
+        match x + i % 3 - 1, y + ((i / 3) % 3 - 1), z + ((i / 9) % 3 - 1), w + (i / 27 - 1) with
+        | x', y', z', w' when
+            (valid x' (Array4D.length1 array)) &&
+            (valid y' (Array4D.length2 array)) &&
+            (valid z' (Array4D.length3 array)) &&
+            (valid w' (Array4D.length4 array)) ->
+                match array.[x', y', z', w'] with
+                | Active -> 1
+                | Inactive -> 0
+        | _,_,_,_ -> 0
+    )
 
-let getAdjacentCoordinates4d x y z w =
-    Array.allPairs (Array.allPairs (Array.allPairs (values x) (values y)) (values z)) (values w)
-    |> Array.choose (fun (((x', y'), z'), w') -> if x = x' && y = y' && z = z' && w = w' then None else Some (x', y', z', w'))
+let determineNewState = function | Active, 2 | Active, 3 | Inactive, 3 -> Active | _, _ -> Inactive
 
-let itemOrDefault3d (cell : _[,,]) (x, y, z) = 
-    try cell.[x,y,z] with | _ -> Inactive
+let countNext4d (current : _ [,,,]) =
+    Array4D.init ((Array4D.length1 current) + 2) ((Array4D.length2 current) + 2) ((Array4D.length3 current) + 2) ((Array4D.length4 current) + 2)
+        (fun x y z w -> determineNewState (getItemOrDefault4d (x-1) (y-1) (z-1) (w-1) current, (countAdjacent4d (x-1) (y-1) (z-1) (w-1) current)))
 
-let itemOrDefault4d (cell : _[,,,]) (x, y, z, w) =
-    try cell.[x,y,z,w] with | _ -> Inactive
-
-let countAdjacent3d x y z cell =
-    getAdjacentCoordinates3d x y z
-    |> Array.sumBy (itemOrDefault3d cell >> function Active -> 1 | _ -> 0)
-
-let countAdjacent4d x y z w cell =
-    getAdjacentCoordinates4d x y z w
-    |> Array.sumBy (itemOrDefault4d cell >> function Active -> 1 | _ -> 0)
-
-let determineState = function | Active, 2 | Active, 3 | Inactive, 3 -> Active | _, _ -> Inactive
-
-let countNext3d (current : Cell [,,]) =
-    Array3D.init (Array3D.length1 current) (Array3D.length2 current) (Array3D.length3 current) (fun x y z -> determineState (current.[x,y,z], countAdjacent3d x y z current))
-
-let countNext4d (current : Cell [,,,]) =
-    Array4D.init (Array4D.length1 current) (Array4D.length2 current) (Array4D.length3 current) (Array4D.length4 current) (fun x y z w -> determineState (current.[x,y,z,w], (countAdjacent4d x y z w current)))
+let countNext3d (current : _ [,,]) =
+    Array3D.init ((Array3D.length1 current) + 2) ((Array3D.length2 current) + 2) ((Array3D.length3 current) + 2)
+        (fun x y z -> determineNewState (getItemOrDefault3d (x-1) (y-1) (z-1) current, (countAdjacent3d (x-1) (y-1) (z-1) current)))
 
 let roundValues countNext = Seq.unfold (fun s0 -> Some (s0, countNext s0))
 
@@ -65,10 +71,10 @@ let run countNext rounds =
    >> Seq.cast<Cell>
    >> Seq.sumBy (function Active -> 1 | Inactive -> 0)
 
-Array3D.init x y z initializer3D
+Array3D.init x y 1 (fun x y _ -> initialData.[x].[y])
 |> run countNext3d rounds
 |> printfn "Part 1: %i"
 
-Array4D.init x y z w initializer4D
+Array4D.init x y 1 1 (fun x y _ _ -> initialData.[x].[y])
 |> run countNext4d rounds
 |> printfn "Part 2: %i"
